@@ -498,6 +498,13 @@
       text-align: center;
     }
 
+    .feedback__message strong {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--text);
+  font-weight: 800;
+}
+
     /* Планшеты и телефоны */
 
     @media (max-width: 760px) {
@@ -885,7 +892,7 @@
 
       feedbackCategory.textContent = item.category;
       feedbackDate.textContent = item.date;
-      feedbackMessage.textContent = item.message;
+      feedbackMessage.innerHTML = item.message;
       feedbackName.textContent = item.name;
       feedbackRole.textContent = item.role;
       feedbackAvatar.textContent = item.initials;
