@@ -1,0 +1,1149 @@
+Ниже обновлённый `index.html`:
+
+- логотип слева — **2ГИС**;
+- подпись — **«Мои результаты»**, сотрудник **Родион Москаленко**;
+- оценки удалены, остаётся только текст обратной связи;
+- в плеере три песни с кнопками переключения;
+- после завершения песни автоматически включается следующая;
+- отзывы переключаются кнопками «Назад» и «Вперёд».
+
+Положите рядом с HTML три файла: `song-1.mp3`, `song-2.mp3`, `song-3.mp3`.
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Мои результаты — Родион Москаленко</title>
+
+  <style>
+    :root {
+      --green: #2dbd60;
+      --green-dark: #159447;
+      --green-light: #eaf8ef;
+      --white: #ffffff;
+      --background: #f4f7f5;
+      --text: #1f2923;
+      --muted: #718078;
+      --border: #dfe8e2;
+      --shadow: 0 20px 60px rgba(24, 77, 45, 0.12);
+      --radius-large: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(
+          circle at 10% 10%,
+          rgba(45, 189, 96, 0.13),
+          transparent 28%
+        ),
+        radial-gradient(
+          circle at 90% 90%,
+          rgba(45, 189, 96, 0.09),
+          transparent 30%
+        ),
+        var(--background);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page {
+      width: min(100% - 32px, 1040px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 32px 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Шапка */
+
+    .header {
+      margin-bottom: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .brand__logo {
+      min-width: 82px;
+      height: 48px;
+      padding: 0 14px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--white);
+      font-size: 19px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.7px;
+      background: var(--green);
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(45, 189, 96, 0.24);
+    }
+
+    .brand__text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .brand__title {
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .brand__employee {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Музыкальный плеер */
+
+    .player {
+      width: min(100%, 440px);
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(223, 232, 226, 0.95);
+      border-radius: 19px;
+      box-shadow: 0 10px 30px rgba(24, 77, 45, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .player__control {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--text);
+      background: transparent;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      transition:
+        color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .player__control:hover {
+      color: var(--green-dark);
+      background: var(--green-light);
+      transform: scale(1.05);
+    }
+
+    .player__control--play {
+      width: 44px;
+      height: 44px;
+      color: var(--white);
+      background: var(--green);
+    }
+
+    .player__control--play:hover {
+      color: var(--white);
+      background: var(--green-dark);
+    }
+
+    .player__control:focus-visible,
+    .navigation__button:focus-visible {
+      outline: 3px solid rgba(45, 189, 96, 0.25);
+      outline-offset: 3px;
+    }
+
+    .player__control svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .player__content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .player__topline {
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .player__info {
+      min-width: 0;
+    }
+
+    .player__title {
+      display: block;
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .player__track-number {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .player__time {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .player__progress {
+      width: 100%;
+      height: 4px;
+      display: block;
+      appearance: none;
+      background: var(--border);
+      border-radius: 99px;
+      cursor: pointer;
+    }
+
+    .player__progress::-webkit-slider-thumb {
+      width: 12px;
+      height: 12px;
+      appearance: none;
+      background: var(--green);
+      border: 2px solid var(--white);
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
+    }
+
+    .player__progress::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
+      background: var(--green);
+      border: 2px solid var(--white);
+      border-radius: 50%;
+    }
+
+    /* Основная область */
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .intro {
+      max-width: 760px;
+      margin-bottom: 26px;
+    }
+
+    .intro__label {
+      margin: 0 0 12px;
+      color: var(--green-dark);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .intro__title {
+      margin: 0 0 14px;
+      font-size: clamp(36px, 6vw, 62px);
+      line-height: 1.03;
+      letter-spacing: -0.045em;
+    }
+
+    .intro__description {
+      max-width: 650px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    /* Блок обратной связи */
+
+    .feedback {
+      position: relative;
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid rgba(223, 232, 226, 0.9);
+      border-radius: var(--radius-large);
+      box-shadow: var(--shadow);
+    }
+
+    .feedback::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 210px;
+      height: 210px;
+      content: "";
+      background: var(--green-light);
+      border-radius: 0 0 0 100%;
+      pointer-events: none;
+    }
+
+    .feedback__content {
+      position: relative;
+      min-height: 350px;
+      padding: clamp(28px, 5vw, 54px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 1;
+    }
+
+    .feedback__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .feedback__meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feedback__category {
+      padding: 8px 12px;
+      color: var(--green-dark);
+      font-size: 13px;
+      font-weight: 750;
+      background: var(--green-light);
+      border-radius: 999px;
+    }
+
+    .feedback__date {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .feedback__mark {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--green);
+      font-family: Georgia, serif;
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .feedback__message {
+      max-width: 850px;
+      margin: 38px 0;
+      font-size: clamp(23px, 3.5vw, 36px);
+      font-weight: 650;
+      line-height: 1.35;
+      letter-spacing: -0.025em;
+    }
+
+    .feedback__author {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .feedback__avatar {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 800;
+      background: var(--green);
+      border-radius: 15px;
+    }
+
+    .feedback__name {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .feedback__role {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Переключение отзывов */
+
+    .feedback__navigation {
+      position: relative;
+      padding: 18px clamp(22px, 5vw, 54px);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+      background: #fbfdfb;
+      border-top: 1px solid var(--border);
+      z-index: 1;
+    }
+
+    .navigation__button {
+      min-height: 46px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--text);
+      font-weight: 750;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      transition:
+        color 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    .navigation__button:hover:not(:disabled) {
+      color: var(--green-dark);
+    }
+
+    .navigation__button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .navigation__button--next {
+      justify-self: end;
+    }
+
+    .navigation__button svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2;
+    }
+
+    .navigation__counter {
+      min-width: 74px;
+      color: var(--muted);
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    .navigation__counter strong {
+      color: var(--text);
+    }
+
+    .feedback__content.is-changing {
+      animation: changeFeedback 0.3s ease;
+    }
+
+    @keyframes changeFeedback {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .footer {
+      padding-top: 32px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100% - 20px, 1040px);
+        padding: 18px 0 24px;
+      }
+
+      .header {
+        margin-bottom: 40px;
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .player {
+        width: 100%;
+      }
+
+      .intro__description {
+        font-size: 15px;
+      }
+
+      .feedback__content {
+        min-height: 390px;
+      }
+
+      .feedback__message {
+        margin: 32px 0;
+      }
+
+      .feedback__navigation {
+        gap: 8px;
+      }
+
+      .navigation__button span {
+        display: none;
+      }
+
+      .navigation__button {
+        width: 46px;
+        justify-content: center;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .player {
+        padding: 10px;
+        gap: 5px;
+      }
+
+      .player__control {
+        width: 30px;
+        height: 30px;
+      }
+
+      .player__control--play {
+        width: 42px;
+        height: 42px;
+      }
+
+      .feedback__mark {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <header class="header">
+      <div class="brand">
+        <div class="brand__logo">2ГИС</div>
+
+        <div class="brand__text">
+          <span class="brand__title">Мои результаты</span>
+          <span class="brand__employee">
+            Сотрудник · Родион Москаленко
+          </span>
+        </div>
+      </div>
+
+      <!-- Музыкальный плеер -->
+      <div class="player">
+
+        <!-- Предыдущая песня -->
+        <button
+          class="player__control"
+          id="previousTrackButton"
+          type="button"
+          aria-label="Предыдущая песня"
+          title="Предыдущая песня"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 5h2v14H6z"></path>
+            <path d="M18 6 9 12l9 6z"></path>
+          </svg>
+        </button>
+
+        <!-- Воспроизведение -->
+        <button
+          class="player__control player__control--play"
+          id="playButton"
+          type="button"
+          aria-label="Воспроизвести музыку"
+        >
+          <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5v14l11-7z"></path>
+          </svg>
+        </button>
+
+        <!-- Следующая песня -->
+        <button
+          class="player__control"
+          id="nextTrackButton"
+          type="button"
+          aria-label="Следующая песня"
+          title="Следующая песня"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M16 5h2v14h-2z"></path>
+            <path d="m6 6 9 6-9 6z"></path>
+          </svg>
+        </button>
+
+        <div class="player__content">
+          <div class="player__topline">
+            <div class="player__info">
+              <span class="player__title" id="trackTitle">
+                Первая песня
+              </span>
+
+              <span class="player__track-number" id="trackNumber">
+                Песня 1 из 3
+              </span>
+            </div>
+
+            <span class="player__time">
+              <span id="currentTime">0:00</span>
+              /
+              <span id="duration">0:00</span>
+            </span>
+          </div>
+
+          <input
+            class="player__progress"
+            id="progress"
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            aria-label="Прогресс воспроизведения"
+          >
+        </div>
+
+        <audio id="audio" preload="metadata"></audio>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="intro">
+        <p class="intro__label">Обратная связь</p>
+
+        <h1 class="intro__title">
+          Мои результаты
+        </h1>
+
+        <p class="intro__description">
+          Обратная связь о моей работе, сильных сторонах
+          и направлениях дальнейшего развития.
+        </p>
+      </section>
+
+      <section class="feedback" aria-label="Результаты обратной связи">
+        <div
+          class="feedback__content"
+          id="feedbackContent"
+          aria-live="polite"
+        >
+          <div class="feedback__top">
+            <div class="feedback__meta">
+              <span
+                class="feedback__category"
+                id="feedbackCategory"
+              ></span>
+
+              <time
+                class="feedback__date"
+                id="feedbackDate"
+              ></time>
+            </div>
+
+            <div class="feedback__mark" aria-hidden="true">“</div>
+          </div>
+
+          <blockquote
+            class="feedback__message"
+            id="feedbackMessage"
+          ></blockquote>
+
+          <div class="feedback__author">
+            <div
+              class="feedback__avatar"
+              id="feedbackAvatar"
+            ></div>
+
+            <div>
+              <p
+                class="feedback__name"
+                id="feedbackName"
+              ></p>
+
+              <p
+                class="feedback__role"
+                id="feedbackRole"
+              ></p>
+            </div>
+          </div>
+        </div>
+
+        <nav
+          class="feedback__navigation"
+          aria-label="Переключение обратной связи"
+        >
+          <button
+            class="navigation__button"
+            id="previousFeedbackButton"
+            type="button"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19 12H5"></path>
+              <path d="m12 19-7-7 7-7"></path>
+            </svg>
+
+            <span>Назад</span>
+          </button>
+
+          <div class="navigation__counter">
+            <strong id="currentFeedbackNumber">1</strong>
+            из
+            <span id="totalFeedbackNumber">1</span>
+          </div>
+
+          <button
+            class="navigation__button navigation__button--next"
+            id="nextFeedbackButton"
+            type="button"
+          >
+            <span>Вперёд</span>
+
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </button>
+        </nav>
+      </section>
+    </main>
+
+    <footer class="footer">
+      Родион Москаленко · Результаты обратной связи
+    </footer>
+  </div>
+
+  <script>
+    /*
+      МУЗЫКА
+
+      Положите три музыкальных файла рядом с index.html:
+      song-1.mp3
+      song-2.mp3
+      song-3.mp3
+
+      Названия песен можно поменять в поле title.
+    */
+
+    const tracks = [
+      {
+        title: "Первая песня",
+        file: "song-1.mp3"
+      },
+      {
+        title: "Вторая песня",
+        file: "song-2.mp3"
+      },
+      {
+        title: "Третья песня",
+        file: "song-3.mp3"
+      }
+    ];
+
+    /*
+      ОБРАТНАЯ СВЯЗЬ
+
+      Здесь можно менять, удалять и добавлять карточки.
+      Оценок в карточках нет — только текст.
+    */
+
+    const feedbackItems = [
+      {
+        category: "Сильная сторона",
+        date: "12 сентября",
+        message:
+          "Родион внимательно относится к деталям, быстро включается в рабочие процессы и всегда доводит задачи до результата.",
+        name: "Анна Ковалёва",
+        role: "Руководитель группы",
+        initials: "АК"
+      },
+      {
+        category: "Командная работа",
+        date: "14 сентября",
+        message:
+          "С Родионом комфортно работать в одной команде. Он открыт к обсуждению, спокойно воспринимает обратную связь и помогает коллегам.",
+        name: "Максим Орлов",
+        role: "Менеджер проектов",
+        initials: "МО"
+      },
+      {
+        category: "Коммуникация",
+        date: "17 сентября",
+        message:
+          "Родион умеет понятно объяснять сложные вещи и вовремя сообщает о статусе задач. Благодаря этому работа остаётся прозрачной.",
+        name: "Елена Соколова",
+        role: "Тимлид",
+        initials: "ЕС"
+      },
+      {
+        category: "Развитие",
+        date: "20 сентября",
+        message:
+          "Следующая точка роста — смелее предлагать собственные решения и чаще брать инициативу в новых проектах.",
+        name: "Илья Волков",
+        role: "Руководитель направления",
+        initials: "ИВ"
+      },
+      {
+        category: "Общий итог",
+        date: "24 сентября",
+        message:
+          "Родион показывает стабильный результат, ответственно подходит к работе и заметно развивается от задачи к задаче.",
+        name: "Дмитрий Лебедев",
+        role: "Руководитель отдела",
+        initials: "ДЛ"
+      }
+    ];
+
+    /* ---------------------------------- */
+    /* Переключение обратной связи        */
+    /* ---------------------------------- */
+
+    let currentFeedbackIndex = 0;
+
+    const feedbackContent =
+      document.getElementById("feedbackContent");
+
+    const feedbackCategory =
+      document.getElementById("feedbackCategory");
+
+    const feedbackDate =
+      document.getElementById("feedbackDate");
+
+    const feedbackMessage =
+      document.getElementById("feedbackMessage");
+
+    const feedbackName =
+      document.getElementById("feedbackName");
+
+    const feedbackRole =
+      document.getElementById("feedbackRole");
+
+    const feedbackAvatar =
+      document.getElementById("feedbackAvatar");
+
+    const currentFeedbackNumber =
+      document.getElementById("currentFeedbackNumber");
+
+    const totalFeedbackNumber =
+      document.getElementById("totalFeedbackNumber");
+
+    const previousFeedbackButton =
+      document.getElementById("previousFeedbackButton");
+
+    const nextFeedbackButton =
+      document.getElementById("nextFeedbackButton");
+
+    function renderFeedback() {
+      const item = feedbackItems[currentFeedbackIndex];
+
+      feedbackCategory.textContent = item.category;
+      feedbackDate.textContent = item.date;
+      feedbackMessage.textContent = `«${item.message}»`;
+      feedbackName.textContent = item.name;
+      feedbackRole.textContent = item.role;
+      feedbackAvatar.textContent = item.initials;
+
+      currentFeedbackNumber.textContent =
+        currentFeedbackIndex + 1;
+
+      totalFeedbackNumber.textContent =
+        feedbackItems.length;
+
+      previousFeedbackButton.disabled =
+        currentFeedbackIndex === 0;
+
+      nextFeedbackButton.disabled =
+        currentFeedbackIndex === feedbackItems.length - 1;
+
+      feedbackContent.classList.remove("is-changing");
+
+      requestAnimationFrame(() => {
+        feedbackContent.classList.add("is-changing");
+      });
+    }
+
+    function showPreviousFeedback() {
+      if (currentFeedbackIndex > 0) {
+        currentFeedbackIndex -= 1;
+        renderFeedback();
+      }
+    }
+
+    function showNextFeedback() {
+      if (currentFeedbackIndex < feedbackItems.length - 1) {
+        currentFeedbackIndex += 1;
+        renderFeedback();
+      }
+    }
+
+    previousFeedbackButton.addEventListener(
+      "click",
+      showPreviousFeedback
+    );
+
+    nextFeedbackButton.addEventListener(
+      "click",
+      showNextFeedback
+    );
+
+    document.addEventListener("keydown", (event) => {
+      const activeElement = document.activeElement;
+
+      if (
+        activeElement &&
+        (activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "BUTTON")
+      ) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        showPreviousFeedback();
+      }
+
+      if (event.key === "ArrowRight") {
+        showNextFeedback();
+      }
+    });
+
+    renderFeedback();
+
+    /* ---------------------------------- */
+    /* Музыкальный плеер                  */
+    /* ---------------------------------- */
+
+    let currentTrackIndex = 0;
+
+    const audio = document.getElementById("audio");
+    const playButton = document.getElementById("playButton");
+    const playIcon = document.getElementById("playIcon");
+
+    const previousTrackButton =
+      document.getElementById("previousTrackButton");
+
+    const nextTrackButton =
+      document.getElementById("nextTrackButton");
+
+    const trackTitle =
+      document.getElementById("trackTitle");
+
+    const trackNumber =
+      document.getElementById("trackNumber");
+
+    const progress =
+      document.getElementById("progress");
+
+    const currentTimeElement =
+      document.getElementById("currentTime");
+
+    const durationElement =
+      document.getElementById("duration");
+
+    const playSvg = `
+      <path d="M8 5v14l11-7z"></path>
+    `;
+
+    const pauseSvg = `
+      <path d="M6 5h4v14H6z"></path>
+      <path d="M14 5h4v14h-4z"></path>
+    `;
+
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds)) {
+        return "0:00";
+      }
+
+      const minutes = Math.floor(seconds / 60);
+
+      const remainingSeconds = Math
+        .floor(seconds % 60)
+        .toString()
+        .padStart(2, "0");
+
+      return `${minutes}:${remainingSeconds}`;
+    }
+
+    function updatePlayButton(isPlaying) {
+      playIcon.innerHTML = isPlaying ? pauseSvg : playSvg;
+
+      playButton.setAttribute(
+        "aria-label",
+        isPlaying
+          ? "Поставить музыку на паузу"
+          : "Воспроизвести музыку"
+      );
+    }
+
+    function loadTrack(index, shouldPlay = false) {
+      currentTrackIndex = index;
+
+      const track = tracks[currentTrackIndex];
+
+      audio.src = track.file;
+      audio.load();
+
+      trackTitle.textContent = track.title;
+
+      trackNumber.textContent =
+        `Песня ${currentTrackIndex + 1} из ${tracks.length}`;
+
+      progress.value = 0;
+      currentTimeElement.textContent = "0:00";
+      durationElement.textContent = "0:00";
+
+      updatePlayButton(false);
+
+      if (shouldPlay) {
+        audio.play().catch(() => {
+          console.warn(
+            `Не удалось воспроизвести файл: ${track.file}`
+          );
+        });
+      }
+    }
+
+    function playPreviousTrack() {
+      const wasPlaying = !audio.paused;
+
+      currentTrackIndex =
+        (currentTrackIndex - 1 + tracks.length) %
+        tracks.length;
+
+      loadTrack(currentTrackIndex, wasPlaying);
+    }
+
+    function playNextTrack(forcePlay = false) {
+      const wasPlaying = !audio.paused || forcePlay;
+
+      currentTrackIndex =
+        (currentTrackIndex + 1) % tracks.length;
+
+      loadTrack(currentTrackIndex, wasPlaying);
+    }
+
+    playButton.addEventListener("click", async () => {
+      if (audio.paused) {
+        try {
+          await audio.play();
+        } catch (error) {
+          console.warn(
+            "Не удалось включить музыку. Проверьте музыкальные файлы."
+          );
+        }
+      } else {
+        audio.pause();
+      }
+    });
+
+    previousTrackButton.addEventListener(
+      "click",
+      playPreviousTrack
+    );
+
+    nextTrackButton.addEventListener("click", () => {
+      playNextTrack();
+    });
+
+    audio.addEventListener("play", () => {
+      updatePlayButton(true);
+    });
+
+    audio.addEventListener("pause", () => {
+      updatePlayButton(false);
+    });
+
+    audio.addEventListener("loadedmetadata", () => {
+      durationElement.textContent =
+        formatTime(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      currentTimeElement.textContent =
+        formatTime(audio.currentTime);
+
+      if (audio.duration) {
+        progress.value =
+          (audio.currentTime / audio.duration) * 100;
+      }
+    });
+
+    progress.addEventListener("input", () => {
+      if (audio.duration) {
+        audio.currentTime =
+          (Number(progress.value) / 100) *
+          audio.duration;
+      }
+    });
+
+    /* После завершения включается следующая песня */
+    audio.addEventListener("ended", () => {
+      playNextTrack(true);
+    });
+
+    /* Загружаем первую песню без автозапуска */
+    loadTrack(0);
+  </script>
+</body>
+</html>
+```
